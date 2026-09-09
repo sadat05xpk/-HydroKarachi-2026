@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Karachi Water Stress & Displacement Dashboard 2024</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    body { margin:0; padding:0; font-family: 'Segoe UI', Arial; background:#ffffff; }
+    #map { height: 100vh; width: 100%; }
+    .header { position: absolute; z-index: 1000; background: #1a1a2e; color: white; padding: 10px 22px; left: 50%; transform: translateX(-50%); top: 10px; border-radius: 8px; text-align: center; }
+    .header h1 { margin: 0; font-size: 17px; }
+    .header p { margin: 4px 0 0 0; font-size: 11px; color: #ccc; }
+    .legend { position: absolute; bottom: 25px; right: 15px; background: #ffffff; padding: 12px 14px; z-index: 1000; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; line-height: 22px; color: #000; min-width: 180px; }
+    .legend b { font-size: 14px; display:block; margin-bottom:6px; font-weight:700; }
+    .legend .box { width: 14px; height: 14px; display: inline-block; margin-right: 8px; vertical-align: middle; border: 1px solid #999; }
+    .north-scale { position: absolute; bottom: 25px; left: 15px; z-index: 1000; background: rgba(255,255,255,0.95); padding: 10px; border-radius: 6px; border: 1px solid #ccc; text-align: center; font-size: 12px; }
+    .north-scale .arrow { font-size: 28px; line-height: 20px; }
+    .area-label { font-size: 9px; font-weight: bold; color: #000; background: rgba(255,255,255,0.9); padding: 2px 4px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.3); text-align: center; white-space: nowrap; pointer-events: none; }
+    
+    @media print {
+      .legend, .header, .north-scale, .leaflet-control-scale { 
+        -webkit-print-color-adjust: exact; 
+        print-color-adjust: exact; 
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="header">
+  <h1>Karachi Water Stress & Displacement Dashboard - All Districts</h1>
+  <p>Data Sources: PBS Census 2017, KWSB 2023, URC 2020, KCCI 2023</p>
+</div>
+<div id="map"></div>
+
+<div class="legend">
+<b>Water Stress Level</b>
+<span class="box" style="background:#a50026"></span> Very High - <1 day/week<br>
+<span class="box" style="background:#f46d43"></span> High - 2 days/week<br>
+<span class="box" style="background:#fee08b"></span> Medium - 4-5 days/week<br>
+<span class="box" style="background:#66bd63"></span> Low - Daily 24hr<br><br>
+<b>Displacement 2020</b>
+<span class="box" style="background:#8a2be2; border-radius:50%; border:3px solid #fff"></span> Eviction Zone
+</div>
+
+<div class="north-scale">
+  <div class="arrow">⬆️</div>
+  <b>N</b>
+</div>
+
+<script>
+var map = L.map('map').setView([24.90, 67.05], 9.3);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: 'Leaflet | © OpenStreetMap'
+}).addTo(map);
+
+L.control.scale({position: 'bottomleft', metric: true, imperial: false}).addTo(map);
+
+var waterStressData = {
+"type": "FeatureCollection",
+"features": [
+{"type": "Feature","properties": {"Area": "Orangi", "Stress": "Very High", "Hours": "Once every 3 days", "Population": "2,435,893", "Tanker": "Rs. 5,000-7,000"},"geometry": {"type": "Polygon","coordinates": [[[66.94,24.89],[67.01,24.89],[67.01,24.93],[66.94,24.93],[66.94,24.89]]]}} ,
+{"type": "Feature","properties": {"Area": "Baldia", "Stress": "Very High", "Hours": "Once every 4 days", "Population": "1,068,000", "Tanker": "Rs. 6,000-8,000"},"geometry": {"type": "Polygon","coordinates": [[[66.92,24.83],[66.98,24.83],[66.98,24.88],[66.92,24.88],[66.92,24.83]]]}},
+{"type": "Feature","properties": {"Area": "SITE", "Stress": "Very High", "Hours": "Irregular", "Population": "490,000", "Tanker": "Rs. 5,000-7,000"},"geometry": {"type": "Polygon","coordinates": [[[66.98,24.87],[67.03,24.87],[67.03,24.90],[66.98,24.90],[66.98,24.87]]]}},
+{"type": "Feature","properties": {"Area": "Lyari", "Stress": "Very High", "Hours": "Once every 2 days", "Population": "837,000", "Tanker": "Rs. 3,000-5,000"},"geometry": {"type": "Polygon","coordinates": [[[66.96,24.83],[67.00,24.83],[67.00,24.86],[66.96,24.86],[66.96,24.83]]]}},
+{"type": "Feature","properties": {"Area": "Kemari", "Stress": "Very High", "Hours": "Irregular", "Population": "450,000", "Tanker": "Rs. 4,000-6,000"},"geometry": {"type": "Polygon","coordinates": [[[66.92,24.79],[66.98,24.79],[66.98,24.83],[66.92,24.83],[66.92,24.79]]]}},
+{"type": "Feature","properties": {"Area": "Saddar", "Stress": "Low", "Hours": "Daily 12-18 hours", "Population": "293,000", "Tanker": "Rs. 0"},"geometry": {"type": "Polygon","coordinates": [[[66.99,24.85],[67.03,24.85],[67.03,24.88],[66.99,24.88],[66.99,24.85]]]}},
+{"type": "Feature","properties": {"Area": "DHA", "Stress": "Low", "Hours": "Daily 24 hours", "Population": "310,000", "Tanker": "Rs. 0"},"geometry": {"type": "Polygon","coordinates": [[[67.00,24.78],[67.07,24.78],[67.07,24.84],[67.00,24.84],[67.00,24.78]]]}},
+{"type": "Feature","properties": {"Area": "Clifton", "Stress": "Low", "Hours": "Daily 24 hours", "Population": "210,000", "Tanker": "Rs. 0"},"geometry": {"type": "Polygon","coordinates": [[[67.00,24.80],[67.04,24.80],[67.04,24.83],[67.00,24.83],[67.00,24.80]]]}},
+
+{"type": "Feature","properties": {"Area": "Nazimabad", "Stress": "Medium", "Hours": "Daily 4 hours", "Population": "600,000", "Tanker": "Rs. 2,000-3,000"},"geometry": {"type": "Polygon","coordinates": [[[67.00,24.88],[67.04,24.88],[67.04,24.91],[67.00,24.91],[67.00,24.88]]]}},
+{"type": "Feature","properties": {"Area": "North Nazimabad", "Stress": "Medium", "Hours": "Daily 4 hours", "Population": "740,000", "Tanker": "Rs. 2,000-3,000"},"geometry": {"type": "Polygon","coordinates": [[[67.01,24.91],[67.06,24.91],[67.06,24.95],[67.01,24.95],[67.01,24.91]]]}},
+
+{"type": "Feature","properties": {"Area": "Gulshan-e-Iqbal", "Stress": "Medium", "Hours": "Daily 2-4 hours", "Population": "1,290,000", "Tanker": "Rs. 2,000-3,000"},"geometry": {"type": "Polygon","coordinates": [[[67.04,24.89],[67.10,24.89],[67.10,24.94],[67.04,24.94],[67.04,24.89]]]}},
+
+{"type": "Feature","properties": {"Area": "Korangi", "Stress": "High", "Hours": "Twice a week", "Population": "1,050,000", "Tanker": "Rs. 3,500-5,000"},"geometry": {"type": "Polygon","coordinates": [[[67.09,24.80],[67.15,24.80],[67.15,24.84],[67.09,24.84],[67.09,24.80]]]}},
+{"type": "Feature","properties": {"Area": "Landhi", "Stress": "High", "Hours": "Twice a week", "Population": "950,000", "Tanker": "Rs. 3,500-5,000"},"geometry": {"type": "Polygon","coordinates": [[[67.13,24.82],[67.18,24.82],[67.18,24.86],[67.13,24.86],[67.13,24.82]]]}},
+
+{"type": "Feature","properties": {"Area": "Malir", "Stress": "High", "Hours": "Twice a week", "Population": "730,000", "Tanker": "Rs. 4,000-6,000"},"geometry": {"type": "Polygon","coordinates": [[[67.16,24.84],[67.25,24.84],[67.25,24.90],[67.16,24.90],[67.16,24.84]]]}},
+
+{"type": "Feature","properties": {"Area": "Gadap", "Stress": "Very High", "Hours": "Once a week", "Population": "650,000", "Tanker": "Rs. 6,000-8,000"},"geometry": {"type": "Polygon","coordinates": [[[67.15,24.90],[67.35,24.90],[67.35,25.05],[67.15,25.05],[67.15,24.90]]]}},
+
+{"type": "Feature","properties": {"Area": "New Karachi", "Stress": "High", "Hours": "Once every 2 days", "Population": "830,000", "Tanker": "Rs. 3,000-4,000"},"geometry": {"type": "Polygon","coordinates": [[[67.00,24.93],[67.06,24.93],[67.06,24.97],[67.00,24.97],[67.00,24.93]]]}},
+
+{"type": "Feature","properties": {"Area": "Surjani", "Stress": "High", "Hours": "Once every 2 days", "Population": "710,000", "Tanker": "Rs. 3,000-4,000"},"geometry": {"type": "Polygon","coordinates": [[[66.97,24.95],[67.03,24.95],[67.03,24.99],[66.97,24.99],[66.97,24.95]]]}},
+
+{"type": "Feature","properties": {"Area": "Hub", "Stress": "Very High", "Hours": "Once a week", "Population": "200,000", "Tanker": "Rs. 7,000-9,000"},"geometry": {"type": "Polygon","coordinates": [[[66.85,24.85],[66.95,24.85],[66.95,24.90],[66.85,24.90],[66.85,24.85]]]}},
+
+{"type": "Feature","properties": {"Area": "Scheme 33", "Stress": "Medium", "Hours": "Daily 8 hours", "Population": "980,000", "Tanker": "Rs. 2,000-3,000"},"geometry": {"type": "Polygon","coordinates": [[[67.10,24.92],[67.18,24.92],[67.18,24.98],[67.10,24.98],[67.10,24.92]]]}},
+{"type": "Feature","properties": {"Area": "Bin Qasim", "Stress": "High", "Hours": "Twice a week", "Population": "420,000", "Tanker": "Rs. 4,000-6,000"},"geometry": {"type": "Polygon","coordinates": [[[67.20,24.75],[67.30,24.75],[67.30,24.82],[67.20,24.82],[67.20,24.75]]]}}
+]
+};
+
+L.geoJSON(waterStressData, {
+  style: function(feature) {
+    var color = feature.properties.Stress == "Very High" ? "#a50026" :  
+                feature.properties.Stress == "High" ? "#f46d43" :       
+                feature.properties.Stress == "Medium" ? "#fee08b" :     
+                "#66bd63";                                              
+    return {fillColor: color, weight: 1, opacity: 1, color: "#ffffff", fillOpacity: 0.8};
+  },
+  onEachFeature: function (feature, layer) {
+    layer.bindPopup("<b>"+feature.properties.Area+"</b><br><b>Population 2017:</b> "+feature.properties.Population+"<br><b>Stress:</b> "+feature.properties.Stress+"<br><b>Water Supply:</b> "+feature.properties.Hours+"<br><b>Avg Tanker Cost:</b> "+feature.properties.Tanker+"/month");
+    
+    var center = layer.getBounds().getCenter();
+    L.marker(center, {
+      icon: L.divIcon({
+        className: 'area-label',
+        html: feature.properties.Area,
+        iconSize: [100, 20]
+      })
+    }).addTo(map);
+  }
+}).addTo(map);
+
+// SIRF YE HISSA CHANGE KIYA - PURPLE DOTS
+var displacementData = {
+"type": "FeatureCollection",
+"features": [
+{"type": "Feature","properties": {"Project": "Gujjar Nullah Eviction","Households": 5916},"geometry": { "type": "Point", "coordinates": [67.043, 24.893] }},
+{"type": "Feature","properties": {"Project": "Orangi Nullah Eviction","Households": 4480},"geometry": { "type": "Point", "coordinates": [67.002, 24.908] }},
+{"type": "Feature","properties": {"Project": "Manzoor Colony Eviction","Households": 1048},"geometry": { "type": "Point", "coordinates": [67.090, 24.866] }},
+{"type": "Feature","properties": {"Project": "Kausar Niazi Colony Eviction","Households": 4000},"geometry": { "type": "Point", "coordinates": [67.150, 24.840] }}
+]
+};
+
+L.geoJSON(displacementData, {
+  pointToLayer: function (feature, latlng) {
+    return L.circleMarker(latlng, {
+      radius: 15, // BARA
+      fillColor: "#8a2be2", // PURPLE - BlueViolet
+      color: "#ffffff", // WHITE BORDER
+      weight: 4, // MOTI BORDER
+      opacity: 1, 
+      fillOpacity: 1
+    });
+  },
+  onEachFeature: function (feature, layer) {
+    layer.bindPopup("<b style='color:#8a2be2; font-size:15px'>"+feature.properties.Project+"</b><br><b>Households Displaced:</b> "+feature.properties.Households);
+  }
+}).addTo(map).bringToFront(); // SAB SE UPAR
+
+</script>
+</body>
+</html>
